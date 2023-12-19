@@ -2,7 +2,8 @@ import { BillingInterval, LATEST_API_VERSION } from "@shopify/shopify-api";
 import { shopifyApp } from "@shopify/shopify-app-express";
 import { MongoDBSessionStorage } from "@shopify/shopify-app-session-storage-mongodb";
 import { restResources } from "@shopify/shopify-api/rest/admin/2023-04";
-import { DB_CONN_STRING, DB_NAME } from process.env;
+
+import { DB_CONFIG } from "./utils/constants.js";
 
 
 // The transactions with Shopify will always be marked as test transactions, unless NODE_ENV is production.
@@ -30,7 +31,7 @@ const shopify = shopifyApp({
     path: "/api/webhooks",
   },
   // This should be replaced with your preferred storage strategy
-  sessionStorage: new MongoDBSessionStorage(DB_CONN_STRING, DB_NAME),
+  sessionStorage: new MongoDBSessionStorage(DB_CONFIG.CONN_STRING, DB_CONFIG.NAME),
 });
 
 export default shopify;

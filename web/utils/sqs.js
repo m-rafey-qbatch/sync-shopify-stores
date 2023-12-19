@@ -1,11 +1,11 @@
 import AWS from 'aws-sdk'
-import { AWS_ACCESS_KEY, AWS_SECRET_KEY, REGION, SQS_QUEUE } from process.env
+import { AWS_CONFIG } from "./constants.js"
 
 // Configure AWS SDK with your credentials and region
 AWS.config.update({
-  accessKeyId: AWS_ACCESS_KEY,
-  secretAccessKey: AWS_SECRET_KEY,
-  region: REGION,
+  accessKeyId: AWS_CONFIG.ACCESS_KEY,
+  secretAccessKey: AWS_CONFIG.SECRET_KEY,
+  region: AWS_CONFIG.REGION,
 });
 
 const sqs = new AWS.SQS();
@@ -16,7 +16,7 @@ async function receiveMessages() {
       AttributeNames: ['All'],
       MaxNumberOfMessages: 10,
       MessageAttributeNames: ['All'],
-      QueueUrl: SQS_QUEUE,
+      QueueUrl: AWS_CONFIG.SQS_QUEUE,
       VisibilityTimeout: 60,
       WaitTimeSeconds: 0,
     };
@@ -45,7 +45,7 @@ async function deleteMessages(receiptHandles) {
         Id: `msg${index + 1}`,
         ReceiptHandle: handle,
       })),
-      QueueUrl: SQS_QUEUE,
+      QueueUrl: AWS_CONFIG.SQS_QUEUE,
     };
 
     await sqs.deleteMessageBatch(deleteParams).promise();
@@ -62,7 +62,7 @@ async function sendMessage(messageBody) {
   try {
     const params = {
       MessageBody: JSON.stringify(messageBody),
-      QueueUrl: SQS_QUEUE,
+      QueueUrl: AWS_CONFIG.SQS_QUEUE,
       DelaySeconds: 0,
     };
 
