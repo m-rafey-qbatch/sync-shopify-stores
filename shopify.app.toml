@@ -2,7 +2,7 @@
 
 name = "sync-stores"
 client_id = "a67550ec334a05ecc95c29af0bc620e9"
-application_url = "https://patent-decades-dos-close.trycloudflare.com"
+application_url = "https://asset-happiness-smithsonian-nv.trycloudflare.com"
 embedded = true
 
 [access_scopes]
@@ -11,9 +11,9 @@ scopes = "write_products"
 
 [auth]
 redirect_urls = [
-  "https://patent-decades-dos-close.trycloudflare.com/auth/callback",
-  "https://patent-decades-dos-close.trycloudflare.com/auth/shopify/callback",
-  "https://patent-decades-dos-close.trycloudflare.com/api/auth/callback"
+  "https://asset-happiness-smithsonian-nv.trycloudflare.com/auth/callback",
+  "https://asset-happiness-smithsonian-nv.trycloudflare.com/auth/shopify/callback",
+  "https://asset-happiness-smithsonian-nv.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]

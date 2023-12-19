@@ -83,4 +83,32 @@ export default {
       // }
     },
   },
+
+  ORDERS_CREATE: {
+    deliveryMethod: DeliveryMethod.Http,
+    callbackUrl: "/api/webhooks",
+    callback: async (topic, shop, body, webhookId) => {
+      const payload = JSON.parse(body);
+      // Payload has the following shape:
+      // {
+      //   "shop_id": 954889,
+      //   "shop_domain": "{shop}.myshopify.com"
+      // }
+      return;
+    },
+  },
+
+  ORDERS_UPDATED: {
+    deliveryMethod: DeliveryMethod.Http,
+    callbackUrl: "/api/webhooks",
+    callback: async (topic, shop, body, webhookId) => {
+      const payload = JSON.parse(body);
+      // Payload has the following shape:
+      // {
+      //   "shop_id": 954889,
+      //   "shop_domain": "{shop}.myshopify.com"
+      // }
+      return;
+    },
+  }
 };
