@@ -12,3 +12,5 @@ export const DB_CONFIG = {
   CONN_STRING: process.env.DB_CONN_STRING,
   NAME: process.env.DB_NAME
 };
+
+export const B2B_STORE_NAMES = ["B2BFUCKERISHERE"];

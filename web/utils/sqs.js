@@ -10,7 +10,7 @@ AWS.config.update({
 
 const sqs = new AWS.SQS();
 
-async function receiveMessages() {
+export const receiveMessages = async () => {
   try {
     const params = {
       AttributeNames: ['All'],
@@ -38,7 +38,7 @@ async function receiveMessages() {
   }
 }
 
-async function deleteMessages(receiptHandles) {
+export const deleteMessages = async (receiptHandles) => {
   try {
     const deleteParams = {
       Entries: receiptHandles.map((handle, index) => ({
@@ -58,10 +58,12 @@ async function deleteMessages(receiptHandles) {
 
 
 
-async function sendMessage(messageBody) {
+export const sendMessage = async (messageBody, messageGroupId, messageDeduplicationId) => {
   try {
     const params = {
+      MessageGroupId: messageGroupId,
       MessageBody: JSON.stringify(messageBody),
+      MessageDeduplicationId: messageDeduplicationId,
       QueueUrl: AWS_CONFIG.SQS_QUEUE,
       DelaySeconds: 0,
     };

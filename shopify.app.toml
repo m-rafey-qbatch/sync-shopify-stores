@@ -1,19 +1,19 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
-name = "sync-stores"
-client_id = "a67550ec334a05ecc95c29af0bc620e9"
-application_url = "https://asset-happiness-smithsonian-nv.trycloudflare.com"
+name = "sync-stores-ahsan"
+client_id = "b6269234e93c392fce57f35fcf1f938d"
+application_url = "https://excel-reliable-dates-cancer.trycloudflare.com"
 embedded = true
 
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = "write_products"
+scopes = "write_products,write_orders"
 
 [auth]
 redirect_urls = [
-  "https://asset-happiness-smithsonian-nv.trycloudflare.com/auth/callback",
-  "https://asset-happiness-smithsonian-nv.trycloudflare.com/auth/shopify/callback",
-  "https://asset-happiness-smithsonian-nv.trycloudflare.com/api/auth/callback"
+  "https://excel-reliable-dates-cancer.trycloudflare.com/auth/callback",
+  "https://excel-reliable-dates-cancer.trycloudflare.com/auth/shopify/callback",
+  "https://excel-reliable-dates-cancer.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]
@@ -24,4 +24,4 @@ embedded = false
 
 [build]
 automatically_update_urls_on_dev = true
-dev_store_url = "test-store-659.myshopify.com"
+dev_store_url = "cocomo001.myshopify.com"

@@ -1,4 +1,6 @@
 import { DeliveryMethod } from "@shopify/shopify-api";
+import { B2B_STORE_NAMES } from "./utils/constants.js";
+import { sendMessage } from "./utils/sqs.js"
 
 /**
  * @type {{[key: string]: import("@shopify/shopify-api").WebhookHandler}}
@@ -83,17 +85,12 @@ export default {
       // }
     },
   },
-
-  ORDERS_CREATE: {
+  APP_UNINSTALLED: {
     deliveryMethod: DeliveryMethod.Http,
     callbackUrl: "/api/webhooks",
     callback: async (topic, shop, body, webhookId) => {
       const payload = JSON.parse(body);
-      // Payload has the following shape:
-      // {
-      //   "shop_id": 954889,
-      //   "shop_domain": "{shop}.myshopify.com"
-      // }
+      console.log("UNINSTALLING THE APP", payload, topic);
       return;
     },
   },
@@ -103,11 +100,11 @@ export default {
     callbackUrl: "/api/webhooks",
     callback: async (topic, shop, body, webhookId) => {
       const payload = JSON.parse(body);
-      // Payload has the following shape:
-      // {
-      //   "shop_id": 954889,
-      //   "shop_domain": "{shop}.myshopify.com"
-      // }
+      if (B2B_STORE_NAMES.includes(shop) && payload.financial_status !== "paid") {
+        return;
+      } else {
+        await sendMessage(payload, `${payload.id}`, `${payload.id}-id`);
+      }
       return;
     },
   }
