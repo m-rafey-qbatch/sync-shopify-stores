@@ -100,10 +100,15 @@ export default {
     callbackUrl: "/api/webhooks",
     callback: async (topic, shop, body, webhookId) => {
       const payload = JSON.parse(body);
+      const queueData = {
+        shop: shop,
+        payload: payload
+      };
+
       if (B2B_STORE_NAMES.includes(shop) && payload.financial_status !== "paid") {
         return;
       } else {
-        await sendMessage(payload, `${payload.id}`, `${payload.id}-id`);
+        await sendMessage(queueData, `${payload.id}`, `${payload.id}-id`);
       }
       return;
     },
