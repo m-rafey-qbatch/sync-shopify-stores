@@ -12,8 +12,7 @@
   },
   "dependencies": {
     "@shopify/app": "3.52.0",
-    "@shopify/cli": "3.52.0",
-    "mongoose": "^8.0.3"
+    "@shopify/cli": "3.52.0"
   },
   "author": "rafey",
   "license": "ISC",
