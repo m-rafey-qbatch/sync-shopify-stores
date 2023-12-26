@@ -72,4 +72,6 @@ app.use("/*", shopify.ensureInstalledOnShop(), async (_req, res, _next) => {
     .send(readFileSync(join(STATIC_PATH, "index.html")));
 });
 
-app.listen(PORT);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server running on http://0.0.0.0:${PORT}`);
+ });
