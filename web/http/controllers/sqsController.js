@@ -1,130 +1,142 @@
 import dbConnect from "../../database/connection.js";
 import ShopifySessions from "../../database/models/shopify_sessions.js";
 import shopify from "../../shopify.js";
+import { deleteMessages } from "../../utils/sqs.js"
 dbConnect();
+const MAX_RETRIES = 5
+let tries = 1
 
 export const processSqsMessage = async (req, res) => {
-  try {
-    const store = "cocomo001.myshopify.com";
-    const sessions = await ShopifySessions.find({});
-    const getNestedData = (obj) => obj.edges.map((x) => x.node);
+  const handle = [req.body?.Records?.[0]?.receiptHandle] || []
+  while (tries <= MAX_RETRIES) {
+    try {
+      const body = JSON.parse(req.body?.Records?.[0]?.body)
+      const store = body?.shop
+      const sessions = await ShopifySessions.find({});
+      const storesToBeUpdated = sessions.filter((x) => x.shop === store);
+      const lineItems = body?.payload?.line_items
 
-    // console.log(sessions)
-    const sku = "asd";
+      for (const session of storesToBeUpdated) {
+        const client = new shopify.api.clients.Graphql({ session });
 
-    const storesToBeUpdated = sessions.filter((x) => x.shop === store);
-    // const storesToBeUpdated = sessions
-
-    const result = [];
-
-    function simplifyGraphQLResponse(response) {
-      if (Array.isArray(response)) return response.map(simplifyGraphQLResponse);
-      else if (typeof response === "object" && response !== null) {
-        if ("edges" in response) return simplifyGraphQLResponse(response.edges);
-        else if ("node" in response)
-          return simplifyGraphQLResponse(response.node);
-        else {
-          let simplified = {};
-          for (let key in response)
-            simplified[key] = simplifyGraphQLResponse(response[key]);
-
-          return simplified;
-        }
-      } else return response;
+        for (const item of lineItems)
+          await updateQuantity(item.sku, item.quantity, client)
+      }
+      return endResponse(res, handle)
+    } catch (e) {
+      console.log(e);
+      console.log(`Total Tries: ${tries} -  ${tries < MAX_RETRIES ? "Retrying.." : ''}`)
+      tries++
     }
+  }
+  return endResponse(res, handle)
+};
 
-    for (const session of storesToBeUpdated) {
-      const client = new shopify.api.clients.Graphql({ session });
+const endResponse = async (res, handle) => {
+  await deleteMessages(handle)
+  return res.status(200).json({ success: true });
+}
 
-      const { body } = await client.query({
-        data: {
-          query: `{ product: products(first: 1,  query:"(sku:${sku})" ) {
-            edges {
-              node {
-                id
-                title
-                totalInventory
-                variants (first:20){
-                  edges {
-                    node {
-                      id
-                      title
-                      inventoryQuantity
-                      sku
-                      inventoryItem {
-                        id
-                        inventoryHistoryUrl
-                        inventoryLevels(first:5) {
-                          edges {
-                            node {
-                              id
-                            }
+
+const updateQuantity = async (sku, quantity, client) => {
+  console.log('Fetching Data..')
+  const { body } = await client.query({
+    data: {
+      query: `{product: products(first: 1, query:"(sku:${sku})") {
+        edges {
+          node {
+            id
+            title
+            totalInventory
+            variants (first:1){
+              edges {
+                node {
+                  id
+                  title
+                  inventoryQuantity
+                  sku
+                  inventoryItem {
+                    id
+                    inventoryLevels(first:5) {
+                      edges {
+                        node {
+                          id
+                          location {
+                            id
+                            name
                           }
-                        } 
+                        }
                       }
-                    }
+                    } 
                   }
                 }
               }
             }
           }
-        }`,
-        },
-      });
-
-      const { data } = simplifyGraphQLResponse(body);
-      const inventoryLevel =
-        data?.product?.[0]?.variants?.[0]?.inventoryItem?.inventoryLevels?.[0]
-          ?.id;
-
-      if(inventoryLevel){
-
+        }
       }
-      console.log("*".repeat(100))
-      const temp = {
-        ...(body?.data?.product?.edges?.[0]?.node || []),
-        store: session.shop,
-        variants: getNestedData(
-          body?.data?.product?.edges?.[0]?.node?.variants || {}
-        ),
-      };
-      result.push(temp);
+    }`,
+    },
+  });
 
-      // update the count
+  const { data } = simplifyGraphQLResponse(body);
 
-      await client.query({
-        data: {
-          query: `mutation AdjustInventoryQuantity($input: InventoryAdjustQuantityInput!) {
-            inventoryAdjustQuantity(input: $input) {
-              inventoryLevel {
-                id
-                available
-                incoming
-                item {
-                  id
-                  sku
-                }
-                location {
-                  id
-                  name
-                }
+  console.log('Updating Data..')
+
+  const inventoryLevel =
+    data?.product?.[0]?.variants?.[0]?.inventoryItem
+  const inventoryLevelId = inventoryLevel?.id
+  const locationId = inventoryLevel?.inventoryLevels?.[0].location?.id
+
+  if (inventoryLevelId) {
+    await client.query({
+      data: {
+        query: `mutation inventoryAdjustQuantities($input: InventoryAdjustQuantitiesInput!) {
+          inventoryAdjustQuantities(input: $input) {
+            userErrors {
+              field
+              message
+            }
+            inventoryAdjustmentGroup {
+              createdAt
+              reason
+              changes {
+                name
+                delta
               }
             }
           }
-          `, variables: {
-            "input": {
-              "inventoryLevelId": temp.variants[0].id,
-              "availableDelta": 3
-            }
+        }            
+        `, variables: {
+          "input": {
+            "reason": "other",
+            "name": "available",
+            "changes": [
+              {
+                "delta": -quantity,
+                "inventoryItemId": inventoryLevelId,
+                "locationId": locationId
+              }
+            ]
           }
-          ,
         },
-      });
-      console.log(result);
-      return res.status(200).json({ inventoryLevel });
-    }
-  } catch (e) {
-    console.log("*".repeat(100));
-    console.log(e);
+      },
+    });
   }
-};
+
+}
+function simplifyGraphQLResponse(response) {
+  if (Array.isArray(response)) return response.map(simplifyGraphQLResponse);
+  else if (typeof response === "object" && response !== null) {
+    if ("edges" in response) return simplifyGraphQLResponse(response.edges);
+    else if ("node" in response)
+      return simplifyGraphQLResponse(response.node);
+    else {
+      let simplified = {};
+      for (let key in response)
+        simplified[key] = simplifyGraphQLResponse(response[key]);
+
+      return simplified;
+    }
+  } else return response;
+}
