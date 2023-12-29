@@ -13,4 +13,4 @@ export const DB_CONFIG = {
   NAME: process.env.DB_NAME
 };
 
-export const B2B_STORE_NAMES = ["B2BFUCKERISHERE"];
+export const B2B_STORE_NAMES = ["B2BSHOPISHERE"];
