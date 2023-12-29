@@ -104,11 +104,10 @@ export default {
         shop: shop,
         payload: payload
       };
-
       if (B2B_STORE_NAMES.includes(shop) && payload.financial_status !== "paid") {
         return;
       } else {
-        await sendMessage(queueData, `${payload.id}`, `${payload.id}-id`);
+        await sendMessage(queueData, `${payload.id}`, `${Math.ceil(Math.random()*99999999999)}-id`);
       }
       return;
     },
