@@ -7,7 +7,7 @@ app = "sync-shopify-stores-inventory"
 primary_region = "sin"
 
 [env]
-  HOST = "https://sync-shopify-stores.fly.dev"
+  HOST = "https://sync-shopify-stores-inventory.fly.dev"
   PORT = "8081"
   SCOPES = "write_products,write_orders,write_inventory"
   SHOPIFY_API_KEY = "e5b16d3ad2e5ae5575aa28d4046eed8b"
