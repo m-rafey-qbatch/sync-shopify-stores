@@ -1,6 +1,5 @@
 import { DeliveryMethod } from "@shopify/shopify-api";
-import { B2B_STORE_NAMES } from "./utils/constants.js";
-import { sendMessage } from "./utils/sqs.js"
+import { B2B_STORE_NAMES, SHOP_HOST } from "./utils/constants.js";
 
 /**
  * @type {{[key: string]: import("@shopify/shopify-api").WebhookHandler}}
@@ -100,14 +99,25 @@ export default {
     callbackUrl: "/api/webhooks",
     callback: async (topic, shop, body, webhookId) => {
       const payload = JSON.parse(body);
-      const queueData = {
-        shop: shop,
-        payload: payload
-      };
       if (B2B_STORE_NAMES.includes(shop) && payload.financial_status !== "paid") {
         return;
       } else {
-        await sendMessage(queueData, `${payload.id}`, `${Math.ceil(Math.random()*99999999999)}-id`);
+        for (const shopHost in SHOP_HOST) {
+          if (shopHost !== shop) {
+            const queueData = {
+              shop: SHOP_HOST[shop],
+              payload: payload
+            };
+            //api call here
+            fetch(`https://${SHOP_HOST[shop]}/api/sqs/processSqsMessage`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(queueData)
+            });
+          }
+        }
       }
       return;
     },

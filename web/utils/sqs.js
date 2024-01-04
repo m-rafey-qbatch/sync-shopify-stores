@@ -55,9 +55,6 @@ export const deleteMessages = async (receiptHandles) => {
   }
 }
 
-
-
-
 export const sendMessage = async (messageBody, messageGroupId, messageDeduplicationId) => {
   try {
     const params = {

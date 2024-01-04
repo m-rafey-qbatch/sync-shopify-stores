@@ -13,4 +13,9 @@ export const DB_CONFIG = {
   NAME: process.env.DB_NAME
 };
 
-export const B2B_STORE_NAMES = ["B2BSHOPISHERE"];
+export const SHOP_HOST = {
+  "e6f061-2.myshopify.com": "sync-shopify-stores-inventory.fly.dev",
+  "nowdays-br.myshopify.com": "sync-shopify-stores-inventory-2.fly.dev"
+};
+
+export const B2B_STORE_NAMES = ["e6f061-2.myshopify.com"];

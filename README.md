@@ -77,7 +77,7 @@ flyctl launch
 Step 2 would be pushing your env variables to fly.io. Make sure to change the values.
 
 ```shell
-flyctl secrets set SHOPIFY_API_SECRET=<SHOPIFY_APP_SECRET> AWS_ACCESS_KEY=<AWS_ACCESS_KEY> AWS_SECRET_KEY=<AWS_SECRET_KEY> REGION=<AWS_REGION> SQS_QUEUE=<AWS_SQS_QUEUE> DB_NAME=<MONGO_COLLECTION_NAME> DB_CONN_STRING=<MONGO_CONNECTION_STRING>
+flyctl secrets set SHOPIFY_API_SECRET=<SHOPIFY_APP_SECRET> DB_NAME=<MONGO_COLLECTION_NAME> DB_CONN_STRING=<MONGO_CONNECTION_STRING>
 ```
 
 And lastly, you need to deploy your applications and for that use this:

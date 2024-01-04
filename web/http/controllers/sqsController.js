@@ -1,37 +1,33 @@
 import dbConnect from "../../database/connection.js";
 import ShopifySessions from "../../database/models/shopify_sessions.js";
 import shopify from "../../shopify.js";
-import { deleteMessages } from "../../utils/sqs.js";
+
 dbConnect();
 const MAX_RETRIES = 5;
 let tries = 1;
 const CANCEL_STATUSES = ["partially_refunded", "refunded"];
 
 export const processSqsMessage = async (req, res) => {
-  const handle = [req.body?.Records?.[0]?.receiptHandle] || [];
   while (tries <= MAX_RETRIES) {
     try {
-      const body = JSON.parse(req.body?.Records?.[0]?.body);
+      const body = req.body;
       const store = body?.shop;
-      const sessions = await ShopifySessions.find({});
-      const storesToBeUpdated = sessions.filter((x) => x.shop !== store);
+      const session = (await ShopifySessions.find({shop:store}))?.[0];
       const lineItems = body?.payload?.line_items;
 
-      for (const session of storesToBeUpdated) {
-        const client = new shopify.api.clients.Graphql({ session });
+      const client = new shopify.api.clients.Graphql({ session });
 
-        for (const item of lineItems) {
-          // handle the cancel orders and add the quantity
-          let qty = -+item.quantity;
-          if (
-            CANCEL_STATUSES.includes(body?.payload?.financial_status) ||
-            body?.payload?.cancelled_at?.length
-          )
-            qty = +item.quantity;
-          await updateQuantity(item.sku, qty, client);
-        }
+      for (const item of lineItems) {
+        // handle the cancel orders and add the quantity
+        let qty = -+item.quantity;
+        if (
+          CANCEL_STATUSES.includes(body?.payload?.financial_status) ||
+          body?.payload?.cancelled_at?.length
+        )
+          qty = +item.quantity;
+        await updateQuantity(item.sku, qty, client);
       }
-      return endResponse(res, handle);
+      return endResponse(res);
     } catch (e) {
       console.log(e);
       console.log(
@@ -40,11 +36,10 @@ export const processSqsMessage = async (req, res) => {
       tries++;
     }
   }
-  return endResponse(res, handle);
+  return endResponse(res);
 };
 
-const endResponse = async (res, handle) => {
-  await deleteMessages(handle);
+const endResponse = async (res) => {
   return res.status(200).json({ success: true });
 };
 
