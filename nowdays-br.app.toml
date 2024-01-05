@@ -18,7 +18,7 @@ primary_region = "sin"
   SHOPIFY_API_KEY = "2ca0641c71fbb3050e35232b491bc09b"
 
 [http_service]
-  internal_port = 3000
+  internal_port = 8081
   force_https = true
   auto_stop_machines = false
   auto_start_machines = true
