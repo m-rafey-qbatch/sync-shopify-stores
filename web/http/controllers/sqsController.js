@@ -12,7 +12,10 @@ export const processSqsMessage = async (req, res) => {
     try {
       const body = req.body;
       const store = body?.shop;
+      console.log(`Getting session for store: ${store}`);
+      console.log(`Processing payload: ${body.payload}`);
       const session = (await ShopifySessions.find({shop:store}))?.[0];
+      console.log(`Session from mongoDB: ${session}`);
       const lineItems = body?.payload?.line_items;
 
       const client = new shopify.api.clients.Graphql({ session });
