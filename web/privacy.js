@@ -105,7 +105,7 @@ export default {
         for (const shopHost in SHOP_HOST) {
           if (shopHost !== shop) {
             const queueData = {
-              shop: SHOP_HOST[shop],
+              shop: shopHost,
               payload: payload
             };
             //api call here
