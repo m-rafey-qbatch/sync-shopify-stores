@@ -1,5 +1,5 @@
 import { DeliveryMethod } from "@shopify/shopify-api";
-import { B2B_STORE_NAMES, SHOP_HOST } from "./utils/constants.js";
+import { B2B_STORE_NAMES, CANCEL_STATUSES, SHOP_HOST } from "./utils/constants.js";
 
 /**
  * @type {{[key: string]: import("@shopify/shopify-api").WebhookHandler}}
@@ -99,7 +99,9 @@ export default {
     callbackUrl: "/api/webhooks",
     callback: async (topic, shop, body, webhookId) => {
       const payload = JSON.parse(body);
-      if (B2B_STORE_NAMES.includes(shop) && payload.financial_status !== "paid") {
+      if (B2B_STORE_NAMES.includes(shop) && payload.financial_status !== "paid" && !payload.cancelled_at) {
+        return;
+      } else if (B2B_STORE_NAMES.includes(shop) && payload.cancelled_at && (!CANCEL_STATUSES.includes(payload.financial_status))) {
         return;
       } else {
         for (const shopHost in SHOP_HOST) {

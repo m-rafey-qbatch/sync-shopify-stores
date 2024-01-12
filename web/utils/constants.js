@@ -18,4 +18,6 @@ export const SHOP_HOST = {
   "nowdays-br.myshopify.com": "sync-shopify-stores-inventory-2.fly.dev"
 };
 
+export const CANCEL_STATUSES = ["partially_refunded", "refunded"];
+
 export const B2B_STORE_NAMES = ["e6f061-2.myshopify.com"];
