@@ -12,8 +12,6 @@ export const processSqsMessage = async (req, res) => {
     try {
       const body = req.body;
       const store = body?.shop;
-      console.log("*".repeat(60));
-      console.log(`Getting session for store: ${store}`);
       const session = (await ShopifySessions.find({shop:store}))?.[0];
       const lineItems = body?.payload?.line_items;
 
@@ -22,12 +20,6 @@ export const processSqsMessage = async (req, res) => {
       for (const item of lineItems) {
         // handle the cancel orders and add the quantity
         let qty = -+item.quantity;
-        
-        console.log(`Item processing: ${JSON.stringify(item)}`);
-        console.log(`Order original quantity: ${item.quantity}`);
-        console.log(`Order financial status: ${body?.payload?.financial_status}`);
-        console.log(`Order canclled at: ${body?.payload?.cancelled_at}`)
-
         if (
           CANCEL_STATUSES.includes(body?.payload?.financial_status) ||
           body?.payload?.cancelled_at?.length
@@ -36,7 +28,6 @@ export const processSqsMessage = async (req, res) => {
           console.log(`Order is cancelled and updated quantity is: ${qty}`);
         }
         await updateQuantity(item.sku, qty, client);
-        console.log("$".repeat(60));
       }
       return endResponse(res);
     } catch (e) {
